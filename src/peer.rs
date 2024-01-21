@@ -5,7 +5,7 @@ use crate::{
     worker::{read_message, write_message, PieceProgress, State},
     CLIENT_ID,
 };
-use std::error::Error;
+use anyhow::{anyhow, Result};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -13,7 +13,7 @@ use tokio::{
 
 const PSTR: &[u8] = b"BitTorrent protocol";
 
-pub async fn handshake(peer: &Peer, torrent: &TorrentFile) -> Result<TcpStream, Box<dyn Error>> {
+pub async fn handshake(peer: &Peer, torrent: &TorrentFile) -> Result<TcpStream> {
     // Open TCP stream
     let mut stream = TcpStream::connect((peer.ip, peer.port)).await?;
 
@@ -33,18 +33,18 @@ pub async fn handshake(peer: &Peer, torrent: &TorrentFile) -> Result<TcpStream, 
     stream.read_exact(&mut response).await?;
 
     if response[28..48] != torrent.infohash {
-        return Err("wrong infohash from peer".into());
+        return Err(anyhow!("wrong infohash from peer"));
     }
 
     Ok(stream)
 }
 
-pub async fn init_connection(tcp_stream: &mut TcpStream) -> Result<State, Box<dyn Error>> {
+pub async fn init_connection(tcp_stream: &mut TcpStream) -> Result<State> {
     // Wait for a bitfield as first message
     let bitfield = match read_message(tcp_stream).await? {
         Message::Bitfield(payload) => payload,
         message => {
-            return Err(format!("expected bitfield but got {:?}", message).into());
+            return Err(anyhow!("expected bitfield but got {:?}", message));
         }
     };
 
@@ -58,8 +58,5 @@ pub async fn init_connection(tcp_stream: &mut TcpStream) -> Result<State, Box<dy
         piece_progress: PieceProgress::default(),
         bitfield,
         peer_choking: true,
-        _am_choking: true,
-        _am_interested: true,
-        _peer_interested: false,
     })
 }

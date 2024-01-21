@@ -5,8 +5,6 @@ use serde_bytes::ByteBuf;
 
 use crate::infohash::{infohash, url_encode};
 
-// TODO: implement multi files mode
-
 #[derive(Clone)]
 pub struct TorrentFile {
     pub announce: String,

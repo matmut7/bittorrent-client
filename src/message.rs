@@ -1,4 +1,6 @@
-use std::io::{self, Write};
+use std::io::Write;
+
+use anyhow::{anyhow, Result};
 
 #[derive(Debug)]
 pub enum Message {
@@ -15,7 +17,7 @@ pub enum Message {
 }
 
 impl Message {
-    pub fn to_bytes(&self) -> io::Result<Vec<u8>> {
+    pub fn to_bytes(&self) -> Result<Vec<u8>> {
         let mut buf = Vec::new();
         match self {
             Message::KeepAlive => {
@@ -67,7 +69,7 @@ impl Message {
         Ok(buf)
     }
 
-    pub fn from_bytes(bytes: &[u8]) -> io::Result<Self> {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
         match bytes {
             [0, 0, 0, 0] => Ok(Message::KeepAlive),
             [0, 0, 0, 1, 0] => Ok(Message::Choke),
@@ -97,10 +99,7 @@ impl Message {
                 let length = u32::from_be_bytes([rest[8], rest[9], rest[10], rest[11]]);
                 Ok(Message::Cancel(index, begin, length))
             }
-            _ => Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "Invalid message format",
-            )),
+            _ => Err(anyhow!("Unsupported message format")),
         }
     }
 }

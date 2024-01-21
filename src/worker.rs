@@ -1,6 +1,5 @@
 use std::{collections::VecDeque, sync::Arc, time::Duration};
 
-// TODO: use this everywhere
 use anyhow::{anyhow, Result};
 use sha1::{Digest, Sha1};
 use tokio::{
@@ -23,10 +22,6 @@ pub struct State {
     pub piece_progress: PieceProgress,
     pub bitfield: Vec<u8>,
     pub peer_choking: bool,
-    // TODO: will be used when implementing seeding
-    pub _peer_interested: bool,
-    pub _am_choking: bool,
-    pub _am_interested: bool,
 }
 
 #[derive(Default)]
@@ -54,7 +49,7 @@ pub async fn read_message(tcp_stream: &mut TcpStream) -> Result<Message> {
     let mut whole_msg_bytes: Vec<u8> = Vec::with_capacity(len_buf.len() + payload_buf.len());
     whole_msg_bytes.extend_from_slice(&len_buf);
     whole_msg_bytes.extend_from_slice(&payload_buf);
-    Ok(Message::from_bytes(&whole_msg_bytes)?)
+    Message::from_bytes(&whole_msg_bytes)
 }
 
 pub async fn write_message(tcp_stream: &mut TcpStream, message: &Message) -> Result<()> {
@@ -65,7 +60,6 @@ pub async fn write_message(tcp_stream: &mut TcpStream, message: &Message) -> Res
 
 pub const TIMEOUT: u64 = 10;
 
-// TODO: should return Result
 pub async fn start_download_worker(
     peer: &Peer,
     torrent_file: &TorrentFile,
@@ -155,13 +149,11 @@ pub async fn start_download_worker(
                 match time::timeout(Duration::new(10, 0), read_message(&mut tcp_stream)).await {
                     Ok(Ok(message)) => message,
                     e => {
-                        // eprintln!("error reading TCP stream");
                         work_queue.lock().await.push_back(piece_work);
                         return Err(anyhow!("reading message {:?}", e));
                     }
                 };
 
-            // TODO: respect being Choked
             match message {
                 Message::Piece(received_piece_index, received_block_index, payload) => {
                     if let Err(e) = validate_piece_message(
@@ -192,9 +184,8 @@ pub async fn start_download_worker(
 
                 // other cases
                 message => {
-                    eprintln!("undefined behaviour from peer {:?}", message);
                     work_queue.lock().await.push_back(piece_work);
-                    return Err(anyhow!("undefined behaviour"));
+                    return Err(anyhow!("unsupported behaviour from peer {:?}", message));
                 }
             }
         }

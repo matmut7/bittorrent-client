@@ -83,7 +83,7 @@ pub async fn download_file(torrent_file: &TorrentFile) {
     for peer in peers {
         let thread_result_sender = result_sender.clone();
         let thread_status_sender = status_sender.clone();
-        let thread_torrent_file = torrent_file.clone(); // NOTE: use Arc to avoid this cloning ?
+        let thread_torrent_file = torrent_file.clone();
         let thread_work_queue = work_queue.clone();
         tokio::spawn(async move {
             while (start_download_worker(
@@ -103,7 +103,7 @@ pub async fn download_file(torrent_file: &TorrentFile) {
                     })
                     .await
                 {
-                    eprint!("error sending status to main thread:\n{}", e);
+                    eprintln!("error sending status to main thread:\n{}", e);
                 }
                 time::sleep(Duration::from_secs(3)).await;
             }

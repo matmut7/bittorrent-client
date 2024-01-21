@@ -1,6 +1,6 @@
-# Bittorrent client
+# BiTtorrent client
 
-Educational implementation of a simple Bittorrent client, following this great
+Educational implementation of a simple BiTtorrent client, following this great
 guide: [https://blog.jse.li/posts/torrent/](https://blog.jse.li/posts/torrent/).
 It is capable of downloading a single file torrent.
 

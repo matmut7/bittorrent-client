@@ -132,7 +132,7 @@ pub async fn download_file(torrent_file: &TorrentFile) {
         if start_time.elapsed() >= window_duration {
             let bandwidth = window_bytes_received as u64 / window_duration.as_secs() / 1000;
             println!(
-                "{} Ko/s, {}/{} pieces",
+                "{} ko/s, {}/{} pieces",
                 bandwidth,
                 done_pieces,
                 torrent_file.piece_hashes.len()

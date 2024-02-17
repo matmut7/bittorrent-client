@@ -4,6 +4,8 @@ Educational implementation of a simple BiTtorrent client, following this great
 guide: [https://blog.jse.li/posts/torrent/](https://blog.jse.li/posts/torrent/).
 It is capable of downloading a single file torrent.
 
+![GIF demo](demo/demo.gif)
+
 Multiple aspects of the protocol are missing:
 [multi file torrents](https://wiki.theory.org/BitTorrentSpecification#Info_in_Multiple_File_Mode),
 [trackers announce-list](https://wiki.theory.org/BitTorrentSpecification#Metainfo_File_Structure),

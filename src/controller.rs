@@ -10,6 +10,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use byte_unit::{Byte, UnitType};
 use tokio::{
     sync::{mpsc, Mutex},
     time,
@@ -130,10 +131,11 @@ pub async fn download_file(torrent_file: &TorrentFile) {
         window_bytes_received += result_piece.buf.len();
 
         if start_time.elapsed() >= window_duration {
-            let bandwidth = window_bytes_received as u64 / window_duration.as_secs() / 1000;
+            let speed = Byte::from_u64(window_bytes_received as u64 / window_duration.as_secs())
+                .get_appropriate_unit(UnitType::Decimal);
             println!(
-                "{} ko/s, {}/{} pieces",
-                bandwidth,
+                "{:.2}/s, {}/{} pieces",
+                speed,
                 done_pieces,
                 torrent_file.piece_hashes.len()
             );
